@@ -55,6 +55,10 @@ export default function Seller(){
   async function ubahStatus(id,status){
     await supabase.from('orders').update({ status }).eq('id',id); load();
   }
+  async function hapusOrder(id){
+    if(!confirm('Hapus pesanan ini? Tindakan ini permanen.')) return;
+    await supabase.from('orders').delete().eq('id',id); load();
+  }
   async function logout(){ await supabase.auth.signOut(); router.push('/'); }
   if(loading) return (<div><Navbar/><p className="text-center py-20 text-slate-400">Memuat…</p></div>);
   const inp="w-full mb-3 px-4 py-3 rounded-xl bg-pink-50 border border-pink-100 text-slate-700 focus:outline-none focus:border-pink-300";
@@ -107,6 +111,7 @@ export default function Seller(){
                         )}
                         {o.status==='confirmed' && (<button onClick={()=>ubahStatus(o.id,'in_progress')} className="text-xs font-semibold px-3 py-1.5 rounded-full bg-violet-500 text-white">Mulai Kerjakan</button>)}
                         {o.status==='in_progress' && (<button onClick={()=>ubahStatus(o.id,'completed')} className="text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-600 text-white">Tandai Selesai</button>)}
+                        <button onClick={()=>hapusOrder(o.id)} className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-500 transition"><Trash2 className="w-3.5 h-3.5"/> Hapus</button>
                       </div>
                     </div>
                   ))}

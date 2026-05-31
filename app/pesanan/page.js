@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
+import { Trash2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase';
 const rupiah=(n)=>'Rp'+Number(n).toLocaleString('id-ID');
 const BADGE={ pending:'bg-amber-100 text-amber-700', confirmed:'bg-sky-100 text-sky-700', in_progress:'bg-violet-100 text-violet-700', completed:'bg-emerald-100 text-emerald-700', rejected:'bg-rose-100 text-rose-700' };
@@ -16,6 +17,12 @@ export default function Pesanan(){
     const { data }=await supabase.from('orders').select('*, listings ( title ), stores ( name )').eq('buyer_id',user.id).order('created_at',{ascending:false});
     setOrders(data||[]); setLoading(false);
   })();},[]);
+  async function hapus(id){
+    if(!confirm('Hapus pesanan ini dari histori kamu?')) return;
+    const supabase=createClient();
+    await supabase.from('orders').delete().eq('id',id);
+    setOrders(prev=>prev.filter(o=>o.id!==id));
+  }
   if(loading) return (<div><Navbar/><p className="text-center py-20 text-slate-400">Memuat…</p></div>);
   return (
     <div className="min-h-screen">
@@ -35,7 +42,10 @@ export default function Pesanan(){
                 </div>
                 <div className="flex items-center justify-between mt-3">
                   <span className="font-display font-semibold text-rose-500">{rupiah(o.total)}</span>
-                  <span className="text-xs text-slate-400">{o.pay_method?.toUpperCase()}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-400">{o.pay_method?.toUpperCase()}</span>
+                    <button onClick={()=>hapus(o.id)} className="grid place-items-center w-7 h-7 rounded-full bg-rose-50 hover:bg-rose-100 transition" title="Hapus dari histori"><Trash2 className="w-3.5 h-3.5 text-rose-400"/></button>
+                  </div>
                 </div>
               </div>
             ))}
