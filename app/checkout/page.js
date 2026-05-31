@@ -14,9 +14,12 @@ export default function Checkout(){
     const supabase=createClient();
     const { data:{ user } }=await supabase.auth.getUser();
     if(!user){ setBusy(false); setMsg('Login dulu untuk memesan.'); setTimeout(()=>router.push('/login'),1500); return; }
-    const { error }=await supabase.from('orders').insert({ buyer_id:user.id, store_id:item.store_id, listing_id:item.id, total:item.price, status:'pending', pay_method:pay, telegram_user:tg });
+    const { data, error }=await supabase.from('orders')
+      .insert({ buyer_id:user.id, store_id:item.store_id, listing_id:item.id, total:item.price, status:'pending', pay_method:pay, telegram_user:tg })
+      .select();
     setBusy(false);
     if(error) return setMsg(error.message);
+    if(data && data[0]) localStorage.setItem('chiese_last_order', data[0].order_code);
     localStorage.removeItem('chiese_cart');
     router.push('/sukses');
   }
