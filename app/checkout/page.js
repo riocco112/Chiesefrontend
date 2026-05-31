@@ -5,7 +5,6 @@ import Navbar from '@/components/Navbar';
 import { createClient } from '@/lib/supabase';
 
 const rupiah=(n)=>'Rp'+Number(n).toLocaleString('id-ID');
-const BOT='https://chies112-chiese.hf.space';
 
 export default function Checkout(){
   const router=useRouter();
@@ -23,31 +22,33 @@ export default function Checkout(){
     const { data, error }=await supabase.from('orders')
       .insert({ buyer_id:user.id, store_id:item.store_id, listing_id:item.id, total:item.price, status:'pending', pay_method:pay, telegram_user:id })
       .select('*, listings(title), stores(name, pay_qris_url, pay_gopay, pay_saweria, pay_bank)');
-    setBusy(false);
-    if(error) return setMsg(error.message);
+    if(error){ setBusy(false); return setMsg(error.message); }
     const o=data&&data[0];
     if(o){
       localStorage.setItem('chiese_last_order', o.order_code);
-      // susun info bayar dari toko
       const st=o.stores||{};
       let payInfo='Hubungi penjual untuk info pembayaran.';
-      if(pay==='qris'&&st.pay_qris_url) payInfo='Scan QRIS: '+st.pay_qris_url;
-      else if(pay==='gopay'&&st.pay_gopay) payInfo='GoPay: '+st.pay_gopay;
-      else if(pay==='saweria'&&st.pay_saweria) payInfo='Saweria: '+st.pay_saweria+'\n(tulis kode '+o.order_code+' di catatan)';
-      else if(pay==='transfer'&&st.pay_bank) payInfo='Transfer: '+st.pay_bank;
-      // trigger bot DM buyer (jangan blokir kalau gagal)
+      if(pay==='qris'&&st.pay_qris_url) payInfo='💳 Bayar via QRIS:\n'+st.pay_qris_url;
+      else if(pay==='gopay'&&st.pay_gopay) payInfo='💳 Bayar via GoPay ke: '+st.pay_gopay;
+      else if(pay==='saweria'&&st.pay_saweria) payInfo='💳 Bayar via Saweria:\n'+st.pay_saweria;
+      else if(pay==='transfer'&&st.pay_bank) payInfo='💳 Transfer ke '+(st.pay_bank_name||'Bank')+': '+st.pay_bank;
+      const text =
+        `Halo! Pesanan baru dari <b>Chiescaciy 甜心</b>\n\n`+
+        `🧾 Order ID: <code>${o.order_code}</code>\n\n`+
+        `<b>Jasa:</b>\n• ${(o.listings||{}).title||'jasa'}\n\n`+
+        `💰 <b>Total: ${rupiah(o.total)}</b>\n\n`+
+        `${payInfo}\n\n`+
+        `Setelah bayar, kirim screenshot bukti pembayaran ke bot ini ya! 📸`;
+      // tembak API route server-side (cepat, token aman) — jangan blokir redirect
       try{
-        await fetch(BOT+'/notify/order-created',{
+        await fetch('/api/notify-order',{
           method:'POST', headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({ record:{
-            order_code:o.order_code, listing_title:(o.listings||{}).title,
-            total:o.total, pay_method:pay, store_name:st.name,
-            telegram_user:id, pay_info:payInfo
-          }})
+          body:JSON.stringify({ chatId:id, text })
         });
       }catch(e){}
     }
     localStorage.removeItem('chiese_cart');
+    setBusy(false);
     router.push('/sukses');
   }
 
