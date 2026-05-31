@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, LogOut, Store, Inbox, Check, X } from 'lucide-react';
+import { Plus, LogOut, Store, Inbox, Check, X, Trash2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { createClient } from '@/lib/supabase';
 const rupiah=(n)=>'Rp'+Number(n).toLocaleString('id-ID');
@@ -45,6 +45,12 @@ export default function Seller(){
     const { error }=await supabase.from('listings').insert({ store_id:store.id, title:lform.title, category:lform.category, price:parseInt(lform.price)||0, eta:lform.eta, description:lform.description, image_url });
     setBusy(false); if(error) return alert(error.message);
     setLform({ title:'', category:'coin', price:'', eta:'', description:'' }); setFile(null); load();
+  }
+  async function hapusListing(id){
+    if(!confirm('Yakin hapus jasa ini?')) return;
+    const { error } = await supabase.from('listings').delete().eq('id', id);
+    if(error) return alert(error.message);
+    load();
   }
   async function ubahStatus(id,status){
     await supabase.from('orders').update({ status }).eq('id',id); load();
@@ -123,7 +129,7 @@ export default function Seller(){
 
             <h3 className="font-display text-lg font-semibold text-slate-800 mb-3">Jasa Kamu ({listings.length})</h3>
             <div className="grid sm:grid-cols-2 gap-3">
-              {listings.map(l=>(<div key={l.id} className="bg-white rounded-2xl border border-pink-100 p-4"><div className="font-semibold text-slate-700 text-sm">{l.title}</div><div className="text-rose-500 font-display font-semibold mt-1">{rupiah(l.price)}</div></div>))}
+              {listings.map(l=>(<div key={l.id} className="bg-white rounded-2xl border border-pink-100 p-4 flex items-center justify-between gap-3"><div><div className="font-semibold text-slate-700 text-sm">{l.title}</div><div className="text-rose-500 font-display font-semibold mt-1">{rupiah(l.price)}</div></div><button onClick={()=>hapusListing(l.id)} className="shrink-0 grid place-items-center w-9 h-9 rounded-full bg-rose-50 hover:bg-rose-100 transition" title="Hapus"><Trash2 className="w-4 h-4 text-rose-500"/></button></div>))}
             </div>
           </>
         )}
