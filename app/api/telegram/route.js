@@ -104,9 +104,11 @@ async function handle(update) {
     // ARAH 1: pengirim = SELLER kirim bukti HASIL
     const { data: st } = await sb.from('stores').select('id, name').eq('telegram_chat_id', cid).maybeSingle();
     if (st) {
-      const { data: oc } = await sb.from('orders')
+      const { data: ocArr } = await sb.from('orders')
         .select('*, listings(title)').eq('store_id', st.id).eq('status', 'completed')
-        .is('result_proof', null).order('updated_at', { ascending: false }).limit(1).maybeSingle();
+        .is('result_proof', null).order('updated_at', { ascending: false }).limit(1);
+      const oc = ocArr && ocArr[0];
+      console.log('PHOTO ARAH1 seller?', !!st, 'completed-pending-proof?', !!oc);
       if (oc) {
         await sb.from('orders').update({ result_proof: fileId }).eq('order_code', oc.order_code);
         await send(chatId, `✅ Bukti hasil order <code>${oc.order_code}</code> diteruskan ke pembeli. Makasih! 🪷`);
@@ -117,10 +119,12 @@ async function handle(update) {
       }
     }
     // ARAH 2: pengirim = BUYER kirim bukti BAYAR
-    const { data: po } = await sb.from('orders')
+    const { data: poArr } = await sb.from('orders')
       .select('*, listings(title), stores(name, telegram_chat_id)')
       .eq('telegram_user', cid).eq('status', 'pending')
-      .order('created_at', { ascending: false }).limit(1).maybeSingle();
+      .order('created_at', { ascending: false }).limit(1);
+    const po = poArr && poArr[0];
+    console.log('PHOTO ARAH2 cid=', cid, 'order pending?', po ? po.order_code : 'NONE');
     if (!po) { await send(chatId, 'Bukti diterima, tapi aku nggak nemu order pending atas nama kamu. Pastikan Telegram ID di checkout sama dengan akun ini ya 🙏'); return; }
     const sellerChat = po.stores?.telegram_chat_id;
     await send(chatId, `✅ Bukti pembayaran <b>diterima</b>!\n\nOrder <code>${po.order_code}</code>\nPenjual sedang mengecek. Harap tunggu konfirmasi ya 🙏`);
