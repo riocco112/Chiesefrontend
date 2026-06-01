@@ -1,0 +1,21 @@
+name: Laporan Bulanan Chiescaciy
+on:
+  schedule:
+    # tiap tanggal 28 jam 23:00 WIB (16:00 UTC)
+    - cron: '0 16 28 * *'
+  workflow_dispatch: {}   # bisa trigger manual dari tab Actions
+
+jobs:
+  kirim-laporan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger endpoint report
+        run: |
+          echo "Memicu laporan bulanan..."
+          RESP=$(curl -s -w "\n%{http_code}" "https://chiese.vercel.app/api/report-bulanan?key=${{ secrets.REPORT_SECRET }}")
+          BODY=$(echo "$RESP" | head -n -1)
+          CODE=$(echo "$RESP" | tail -n1)
+          echo "HTTP $CODE"
+          echo "$BODY"
+          if [ "$CODE" != "200" ]; then echo "GAGAL"; exit 1; fi
+          echo "Sukses"
