@@ -63,8 +63,9 @@ async function handle(update) {
     const msgId = cq.message.message_id;
     const [action, code] = (cq.data || '').split(':');
     if (!code) return;
-    const { data: ord } = await sb.from('orders')
-      .select('*, listings(title), stores(name)').eq('order_code', code).maybeSingle();
+    const { data: ordArr } = await sb.from('orders')
+      .select('*, listings(title), stores(name)').eq('order_code', code).limit(1);
+    const ord = ordArr && ordArr[0];
     if (!ord) { await answerCb(cq.id, 'Order tidak ditemukan'); return; }
     const buyerTg = ord.telegram_user;
     const storeName = ord.stores?.name || 'toko';
@@ -102,7 +103,8 @@ async function handle(update) {
   if (msg.photo) {
     const fileId = msg.photo[msg.photo.length - 1].file_id;
     // ARAH 1: pengirim = SELLER kirim bukti HASIL
-    const { data: st } = await sb.from('stores').select('id, name').eq('telegram_chat_id', cid).maybeSingle();
+    const { data: stArr } = await sb.from('stores').select('id, name').eq('telegram_chat_id', cid).limit(1);
+    const st = stArr && stArr[0];
     if (st) {
       const { data: ocArr } = await sb.from('orders')
         .select('*, listings(title)').eq('store_id', st.id).eq('status', 'completed')
@@ -144,7 +146,8 @@ async function handle(update) {
   if (text.startsWith('/id')) { await send(chatId, `🆔 Telegram ID kamu: <code>${chatId}</code>`); return; }
   if (text.startsWith('/help')) { await send(chatId, '<b>Bantuan Chiese Bot</b>\n/start — mulai\n/id — cek Telegram ID\n/orders — pesanan masuk (seller)\n\nAtau ketik pertanyaan bebas, aku jawab pakai AI 🤖'); return; }
   if (text.startsWith('/orders')) {
-    const { data: st } = await sb.from('stores').select('id, name').eq('telegram_chat_id', cid).maybeSingle();
+    const { data: stArr2 } = await sb.from('stores').select('id, name').eq('telegram_chat_id', cid).limit(1);
+    const st = stArr2 && stArr2[0];
     if (!st) { await send(chatId, 'Kamu belum punya toko terhubung. Buka toko dulu di website & pasang Telegram ID ini.'); return; }
     const { data: ords } = await sb.from('orders')
       .select('order_code, total, listings(title)').eq('store_id', st.id).eq('status', 'pending')
