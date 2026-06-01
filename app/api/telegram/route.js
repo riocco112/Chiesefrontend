@@ -32,17 +32,31 @@ const doneKb = (code) => ({ inline_keyboard: [[
   { text: '✅ Tandai Selesai', callback_data: `done:${code}` },
 ]] });
 
+function bersihinText(t){
+  if(!t) return t;
+  return t
+    .replace(/<[^>]*>/g, '')
+    .replace(/\*\*/g, '')
+    .replace(/\*/g, '')
+    .replace(/(^|\s)#{1,6}\s?/g, '$1')
+    .replace(/`+/g, '')
+    .replace(/_{1,3}([^_]+)_{1,3}/g, '$1')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 async function csReply(text) {
   try {
     const r = await groq.chat.completions.create({
       model: 'openai/gpt-oss-120b',
       messages: [
-        { role: 'system', content: 'Kamu CS Chiescaciy 甜心, marketplace jasa joki & item game (Heartopia, Mobile Legends, Roblox, Fisch, Fish It). Jawab ramah, singkat, Bahasa Indonesia santai. Bantu soal cara order, status, bayar. Jangan mengarang status order.' },
+        { role: 'system', content: 'Kamu CS Chiescaciy 甜心, marketplace jasa joki & item game (Heartopia, Mobile Legends, Roblox, Fisch, Fish It). Jawab ramah, singkat, Bahasa Indonesia santai. Bantu soal cara order, status, bayar. Jangan mengarang status order. FORMAT PENTING: tulis plain text biasa. Untuk daftar/list pakai tanda titik bullet (•) atau angka (1. 2. 3.). DILARANG memakai karakter format seperti bintang (*), pagar (#), tanda bintang ganda (**), garis bawah (_), atau tag HTML apapun. Jangan bold, jangan italic, cukup teks polos yang rapi.' },
         { role: 'user', content: text },
       ],
       temperature: 0.6, max_tokens: 400,
     });
-    return r.choices[0]?.message?.content?.trim() || 'Maaf, lagi ada gangguan. Coba lagi ya 🙏';
+    return bersihinText(r.choices[0]?.message?.content?.trim()) || 'Maaf, lagi ada gangguan. Coba lagi ya 🙏';
   } catch { return 'Maaf, lagi ada gangguan. Coba lagi ya 🙏'; }
 }
 
