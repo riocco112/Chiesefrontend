@@ -8,11 +8,14 @@ const rupiah=(n)=>'Rp'+Number(n).toLocaleString('id-ID');
 export default function Detail(){
   const { id }=useParams(); const router=useRouter();
   const [item,setItem]=useState(null); const [loading,setLoading]=useState(true);
+  const [reviews,setReviews]=useState([]);
   useEffect(()=>{(async()=>{
     try{
       const supabase=createClient();
       const { data }=await supabase.from('listings').select('*, stores ( name, slug, is_verified, description )').eq('id',id).single();
       setItem(data);
+      const { data:revs }=await supabase.from('reviews').select('rating, comment, created_at, profiles(full_name, username)').eq('listing_id',id).order('created_at',{ascending:false}).limit(20);
+      setReviews(revs||[]);
     }catch(e){} finally{ setLoading(false); }
   })();},[id]);
   if(loading) return (<div><Navbar/><p className="text-center py-20 text-slate-400">Memuat…</p></div>);
@@ -38,6 +41,28 @@ export default function Detail(){
             <div className="font-display text-3xl font-semibold text-rose-500 mb-6">{rupiah(item.price)}</div>
             <button onClick={()=>{ localStorage.setItem('chiese_cart', JSON.stringify(item)); router.push('/checkout'); }} className="w-full py-4 rounded-2xl font-semibold text-white bg-gradient-to-r from-pink-400 to-rose-400 shadow-lg shadow-pink-300/50 inline-flex items-center justify-center gap-2"><ShoppingCart className="w-5 h-5"/> Beli Sekarang</button>
           </div>
+        </div>
+
+        <div className="mt-10">
+          <h2 className="font-display text-lg font-semibold text-slate-800 mb-3">Ulasan Pembeli ({reviews.length})</h2>
+          {reviews.length===0 ? (
+            <p className="text-slate-400 text-sm">Belum ada ulasan untuk jasa ini.</p>
+          ) : (
+            <div className="space-y-3">
+              {reviews.map((r,i)=>(
+                <div key={i} className="bg-white rounded-2xl border border-pink-100 p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      {[1,2,3,4,5].map(n=>(<Star key={n} className={`w-4 h-4 ${n<=r.rating?'text-amber-400':'text-slate-200'}`} fill="currentColor"/>))}
+                    </div>
+                    <span className="text-[11px] text-slate-400">{new Date(r.created_at).toLocaleDateString('id-ID')}</span>
+                  </div>
+                  <div className="text-xs font-semibold text-slate-600 mt-1.5">{r.profiles?.full_name || r.profiles?.username || 'Pembeli'}</div>
+                  {r.comment && <p className="text-slate-500 text-sm mt-1 leading-relaxed">{r.comment}</p>}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
