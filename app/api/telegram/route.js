@@ -48,8 +48,11 @@ async function csReply(text) {
 
 export async function POST(req) {
   const update = await req.json().catch(() => ({}));
-  // proses async, balas cepat
-  handle(update).catch((e) => console.error('handle err', e));
+  try {
+    await handle(update);
+  } catch (e) {
+    console.error('handle err', e);
+  }
   return NextResponse.json({ ok: true });
 }
 
