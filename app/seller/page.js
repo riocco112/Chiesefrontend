@@ -31,6 +31,8 @@ export default function Seller(){
   const [agree,setAgree]=useState(false);
   const [lform,setLform]=useState({ title:'', category:'level', game:'heartopia', price:'', eta:'', description:'' });
   const [file,setFile]=useState(null); const [busy,setBusy]=useState(false);
+  const [aboutForm,setAboutForm]=useState({ about:'', active_hours:'' });
+  const [aboutLogo,setAboutLogo]=useState(null);
   const supabase=createClient();
 
   async function load(){
@@ -39,6 +41,7 @@ export default function Seller(){
     setUser(user);
     const { data:s }=await supabase.from('stores').select('*').eq('owner_id',user.id).maybeSingle();
     setStore(s);
+    if(s) setAboutForm({ about:s.about||'', active_hours:s.active_hours||'' });
     if(s){
       const { data:l }=await supabase.from('listings').select('*').eq('store_id',s.id).order('created_at',{ascending:false}); setListings(l||[]);
       const { data:o }=await supabase.from('orders').select('*, listings ( title )').eq('store_id',s.id).order('created_at',{ascending:false}); setOrders(o||[]);
@@ -72,6 +75,16 @@ export default function Seller(){
     setLform({ title:'', category:'level', game:'heartopia', price:'', eta:'', description:'' }); setFile(null); load();
   }
 
+async function simpanAbout(){
+    setBusy(true);
+    try{
+      let logo_url=store.logo_url||null;
+      if(aboutLogo) logo_url=await uploadImage(aboutLogo,'chiese/stores');
+      const { error }=await supabase.from('stores').update({ about:aboutForm.about, active_hours:aboutForm.active_hours, logo_url }).eq('id',store.id);
+      if(error){ setBusy(false); return alert(error.message); }
+    }catch(e){ setBusy(false); return alert('Gagal: '+e.message); }
+    setBusy(false); setAboutLogo(null); alert('About Me tersimpan!'); load();
+  }
   async function hapusListing(id){
     if(!confirm('Yakin hapus jasa ini?')) return;
     const { error } = await supabase.from('listings').delete().eq('id', id);
@@ -125,7 +138,19 @@ export default function Seller(){
               <div>
                 <h2 className="font-display text-xl font-semibold text-slate-800 mb-1">{store.name}</h2>
                 <p className="text-slate-400 text-sm">{store.description}</p>
+                <a href={`/toko/${store.slug}`} className="text-xs text-rose-400 underline">Lihat halaman toko publik →</a>
               </div>
+            </div>
+
+            <div className="mt-5 pt-5 border-t border-pink-50">
+              <div className="font-semibold text-slate-700 text-sm mb-2">✨ About Me Toko (tampil ke publik)</div>
+              <label className="text-xs font-semibold text-slate-500 mb-1 block">Tentang toko / branding kamu</label>
+              <textarea className={inp} rows={3} placeholder="Kenapa buka toko, spesialis game apa, kelebihan kamu, dll. Ini yang bikin buyer percaya!" value={aboutForm.about} onChange={e=>setAboutForm({...aboutForm,about:e.target.value})}/>
+              <label className="text-xs font-semibold text-slate-500 mb-1 block">Jam Aktif</label>
+              <input className={inp} placeholder="mis. 10.00 - 22.00 WIB" value={aboutForm.active_hours} onChange={e=>setAboutForm({...aboutForm,active_hours:e.target.value})}/>
+              <label className="text-xs font-semibold text-slate-500 mb-1 block">Ganti Logo (opsional)</label>
+              <input className="mb-3 text-sm text-slate-500 block" type="file" accept="image/*" onChange={e=>setAboutLogo(e.target.files[0])}/>
+              <button onClick={simpanAbout} disabled={busy} className="px-5 py-2.5 rounded-xl font-semibold text-white bg-gradient-to-r from-pink-400 to-rose-400 shadow-md shadow-pink-300/50 disabled:opacity-60 text-sm">{busy?'Menyimpan…':'Simpan About Me'}</button>
             </div>
 
             <div className="bg-white rounded-3xl border border-pink-100 p-6 shadow-sm mb-6">

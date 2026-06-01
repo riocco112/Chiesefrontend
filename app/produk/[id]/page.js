@@ -11,7 +11,7 @@ export default function Detail(){
   useEffect(()=>{(async()=>{
     try{
       const supabase=createClient();
-      const { data }=await supabase.from('listings').select('*, stores ( name, is_verified, description )').eq('id',id).single();
+      const { data }=await supabase.from('listings').select('*, stores ( name, slug, is_verified, description )').eq('id',id).single();
       setItem(data);
     }catch(e){} finally{ setLoading(false); }
   })();},[id]);
@@ -28,7 +28,10 @@ export default function Detail(){
           </div>
           <div>
             <h1 className="font-display text-3xl font-semibold text-slate-800 mb-3">{item.title}</h1>
-            <div className="flex items-center gap-2 text-sm text-slate-500 mb-2">{item.stores?.name}{item.stores?.is_verified && <BadgeCheck className="w-4 h-4 text-pink-400"/>}</div>
+            <div className="flex items-center gap-2 text-sm mb-2">
+              {item.game && <span className="text-[10px] font-bold bg-pink-100 text-rose-500 px-2 py-0.5 rounded-full">{({heartopia:'Heartopia',ml:'Mobile Legends',roblox:'Roblox',fisch:'Fisch',fishit:'Fish It',lainnya:'Lainnya'})[item.game]||'Game'}</span>}
+              <a href={item.stores?.slug?`/toko/${item.stores.slug}`:'#'} className="inline-flex items-center gap-1 text-slate-500 hover:text-rose-400 underline-offset-2 hover:underline">{item.stores?.name}{item.stores?.is_verified && <BadgeCheck className="w-4 h-4 text-pink-400"/>}</a>
+            </div>
             <div className="flex items-center gap-1 text-sm mb-4"><Star className="w-4 h-4 text-amber-400" fill="currentColor"/><span className="font-semibold text-amber-500">{Number(item.rating_avg).toFixed(1)}</span><span className="text-slate-400">· {item.sold_count} terjual</span></div>
             <p className="text-slate-500 leading-relaxed mb-4">{item.description||'Tidak ada deskripsi.'}</p>
             {item.eta && <div className="inline-flex items-center gap-2 text-sm text-slate-600 bg-pink-50 px-3 py-1.5 rounded-full mb-6"><Clock className="w-4 h-4"/> Estimasi: {item.eta}</div>}
