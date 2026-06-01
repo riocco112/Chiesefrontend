@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Star, BadgeCheck, Clock, ShoppingCart, ArrowLeft } from 'lucide-react';
+import { Star, BadgeCheck, Clock, ShoppingCart, ArrowLeft, Share2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { createClient } from '@/lib/supabase';
 const rupiah=(n)=>'Rp'+Number(n).toLocaleString('id-ID');
@@ -18,13 +18,25 @@ export default function ProdukClient(){
       setReviews(revs||[]);
     }catch(e){} finally{ setLoading(false); }
   })();},[id]);
+  async function bagikan(){
+    const url = typeof window!=='undefined' ? window.location.href : '';
+    const judul = item?.title || 'Chiescaciy';
+    if (navigator.share) {
+      try { await navigator.share({ title: judul, text: `Cek "${judul}" di Chiescaciy`, url }); } catch(e){}
+    } else {
+      try { await navigator.clipboard.writeText(url); alert('Link disalin! Tinggal paste & bagikan'); } catch(e){ alert(url); }
+    }
+  }
   if(loading) return (<div><Navbar/><p className="text-center py-20 text-slate-400">Memuat…</p></div>);
   if(!item) return (<div><Navbar/><p className="text-center py-20 text-slate-400">Produk tidak ditemukan.</p></div>);
   return (
     <div className="min-h-screen">
       <Navbar/>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-        <button onClick={()=>router.back()} className="inline-flex items-center gap-2 text-sm text-rose-400 mb-6"><ArrowLeft className="w-4 h-4"/> Kembali</button>
+        <div className="flex items-center justify-between mb-6">
+          <button onClick={()=>router.back()} className="inline-flex items-center gap-2 text-sm text-rose-400"><ArrowLeft className="w-4 h-4"/> Kembali</button>
+          <button onClick={bagikan} className="inline-flex items-center gap-1.5 text-sm font-semibold text-rose-500 bg-pink-50 hover:bg-pink-100 px-3 py-1.5 rounded-full transition"><Share2 className="w-4 h-4"/> Bagikan</button>
+        </div>
         <div className="grid md:grid-cols-2 gap-8">
           <div className="aspect-[4/3] rounded-3xl bg-gradient-to-br from-pink-200 to-rose-300 overflow-hidden">
             {item.image_url && <img src={item.image_url} alt={item.title} className="w-full h-full object-cover"/>}
