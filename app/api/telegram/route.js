@@ -78,7 +78,7 @@ async function handle(update) {
       await editMarkup(chatId, msgId, doneKb(code));
       await send(chatId, `✅ Pembayaran <code>${code}</code> dikonfirmasi.\nKerjakan joki-nya. Kalau sudah kelar, tekan <b>Tandai Selesai</b> di atas.`);
       if (buyerTg && /^\d+$/.test(String(buyerTg)))
-        await send(buyerTg, `✅ <b>Pembayaran Dikonfirmasi!</b>\n\nOrder <code>${code}</code> dikonfirmasi penjual. Joki kamu segera dikerjakan.\n\nMakasih sudah order di <b>${storeName}</b> 💝`);
+        await send(buyerTg, `✅ <b>Pembayaran Dikonfirmasi!</b>\n\nOrder <code>${code}</code> dikonfirmasi penjual.\n\n🔒 Sekarang <b>kirim PASSWORD akun</b> kamu ke chat ini (ketik & kirim sebagai pesan biasa). Password langsung diteruskan ke penjual dan <b>tidak disimpan</b> di sistem.\n\nMakasih sudah order di <b>${storeName}</b> 💝`);
     } else if (action === 'reject') {
       await sb.from('orders').update({ status: 'rejected' }).eq('order_code', code);
       await answerCb(cq.id, 'Ditolak ❌');
@@ -160,6 +160,24 @@ async function handle(update) {
     await send(chatId, `📦 <b>Pesanan Pending (${ords.length})</b> — ${st.name}\n\n${lines}`);
     return;
   }
+  // ===== RELAY PASSWORD =====
+  if (text && !text.startsWith('/')) {
+    const { data: apArr } = await sb.from('orders')
+      .select('*, listings(title), stores(name, telegram_chat_id)')
+      .eq('telegram_user', cid).eq('await_password', true).eq('status', 'confirmed')
+      .order('updated_at', { ascending: false }).limit(1);
+    const ap = apArr && apArr[0];
+    if (ap) {
+      await sb.from('orders').update({ await_password: false, status: 'in_progress' }).eq('order_code', ap.order_code);
+      const sc = ap.stores?.telegram_chat_id;
+      if (sc) {
+        await send(sc, `🔑 <b>Password masuk — ${ap.order_code}</b>\n• Login: ${ap.login_via||'-'}\n• ID/Email: <code>${ap.account_id||'-'}</code>\n• Nickname: ${ap.nickname||'-'}\n• Password: <code>${text}</code>\n\nSilakan kerjakan joki. Kalau kelar, tekan <b>Tandai Selesai</b>.`, doneKb(ap.order_code));
+      }
+      await send(chatId, `✅ Data login order <code>${ap.order_code}</code> diteruskan ke penjual. Joki segera dikerjakan ya! 💝\n\n🔒 <i>Demi keamanan, hapus pesan password kamu setelah joki selesai.</i>`);
+      return;
+    }
+  }
+
   if (text) { await send(chatId, await csReply(text)); }
 }
 
