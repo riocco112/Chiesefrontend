@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Star, BadgeCheck, Clock, ArrowLeft, Store as StoreIcon, Share2 } from 'lucide-react';
+import { Star, BadgeCheck, Clock, ArrowLeft, Store as StoreIcon, Share2, MessageCircle } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { createClient } from '@/lib/supabase';
 
@@ -62,6 +62,7 @@ export default function TokoClient(){
                 <span className="text-slate-400">{store.sold_count||0} pesanan selesai</span>
               </div>
               {store.active_hours && <div className="inline-flex items-center gap-1.5 text-xs text-slate-500 bg-pink-50 px-3 py-1 rounded-full mt-2"><Clock className="w-3.5 h-3.5"/> {store.active_hours}</div>}
+              {store.id && <div className="mt-2"><a href={`https://t.me/Jaaillbot?start=chat_${store.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-white bg-gradient-to-r from-pink-400 to-rose-400 px-4 py-2 rounded-full shadow shadow-pink-300/40 transition hover:opacity-90"><MessageCircle className="w-4 h-4"/> Chat Penjual</a></div>}
             </div>
           </div>
           {store.about && (
