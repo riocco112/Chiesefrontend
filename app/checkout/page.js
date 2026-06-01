@@ -145,7 +145,10 @@ export default function Checkout(){
         </div>
 
         <div className="bg-white rounded-3xl border border-pink-100 p-6 shadow-sm">
-          <div className="text-xs text-slate-500 mb-2 bg-pink-50 rounded-lg px-3 py-2">💡 Chat <b>/start</b> ke bot <b>@Jaaillbot</b> dulu untuk dapat Telegram ID kamu, lalu tempel di sini.</div>
+          <div className="flex items-center gap-2 mb-2">
+            <a href="https://t.me/userinfobot" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-500 bg-pink-50 hover:bg-pink-100 px-3 py-2 rounded-lg transition">📋 Ambil ID Telegram</a>
+            <span className="text-xs text-slate-400">klik → /start → copy ID → tempel di bawah</span>
+          </div>
           <input className={inp} placeholder="Telegram ID (angka, mis. 7710155531)" value={tg} onChange={e=>setTg(e.target.value)} inputMode="numeric"/>
           <select className={inp} value={pay} onChange={e=>setPay(e.target.value)}>
             <option value="qris">QRIS</option><option value="gopay">GoPay</option><option value="saweria">Saweria</option><option value="transfer">Transfer Bank</option>
