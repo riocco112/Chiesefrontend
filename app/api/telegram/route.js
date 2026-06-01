@@ -76,6 +76,54 @@ async function handle(update) {
     const msgId = cq.message.message_id;
     const [action, code] = (cq.data || '').split(':');
     if (!code) return;
+
+    // ===== RELAY CHAT: hub (buyer minta) / acc (seller terima) / tolak (seller tolak) =====
+    if (action === 'hub') {
+      const storeId = code;
+      const { data: stA } = await sb.from('stores').select('id, name, telegram_chat_id').eq('id', storeId).limit(1);
+      const st = stA && stA[0];
+      if (!st || !st.telegram_chat_id) { await answerCb(cq.id, 'Penjual tidak tersedia'); return; }
+      // tutup sesi pending lama buyer ini biar nggak numpuk
+      await sb.from('chat_sessions').update({ status:'closed', updated_at:new Date().toISOString() })
+        .eq('buyer_chat_id', String(chatId)).in('status', ['pending','active']);
+      const { data: ins } = await sb.from('chat_sessions')
+        .insert({ buyer_chat_id: String(chatId), seller_chat_id: String(st.telegram_chat_id), store_id: st.id, status: 'pending' })
+        .select('id').limit(1);
+      const sid = ins && ins[0] && ins[0].id;
+      await answerCb(cq.id, 'Permintaan dikirim ke penjual ✅');
+      await send(chatId, `📨 Permintaan chat dikirim ke penjual <b>${st.name}</b>. Tunggu penjual menerima ya 💝`);
+      await send(st.telegram_chat_id, `🔔 <b>Ada pembeli mau menghubungi kamu</b>
+Toko: ${st.name}
+
+Mau dilayani? Kalau terima, pesan pembeli akan diteruskan ke kamu lewat bot.`, { inline_keyboard: [[{ text: '✅ Terima', callback_data: `acc:${sid}` }, { text: '❌ Tolak', callback_data: `tolak:${sid}` }]] });
+      return;
+    }
+    if (action === 'acc' || action === 'tolak') {
+      const sid = code;
+      const { data: csA } = await sb.from('chat_sessions').select('*').eq('id', sid).limit(1);
+      const sess = csA && csA[0];
+      if (!sess) { await answerCb(cq.id, 'Sesi tidak ditemukan'); return; }
+      if (String(sess.seller_chat_id) !== String(chatId)) { await answerCb(cq.id, 'Bukan untuk kamu'); return; }
+      if (sess.status !== 'pending') { await answerCb(cq.id, 'Sesi sudah diproses'); return; }
+      if (action === 'tolak') {
+        await sb.from('chat_sessions').update({ status:'rejected', updated_at:new Date().toISOString() }).eq('id', sid);
+        await answerCb(cq.id, 'Ditolak');
+        await editMarkup(chatId, msgId, { inline_keyboard: [] });
+        await send(chatId, '❌ Permintaan chat ditolak.');
+        await send(sess.buyer_chat_id, '🙏 Maaf, penjual lagi nggak bisa dihubungi sekarang. Coba lagi nanti ya 💝');
+        return;
+      }
+      // acc: aktifkan + tutup sesi aktif lain pihak ini
+      await sb.from('chat_sessions').update({ status:'closed', updated_at:new Date().toISOString() })
+        .or(`buyer_chat_id.eq.${sess.buyer_chat_id},seller_chat_id.eq.${sess.seller_chat_id}`).eq('status','active');
+      await sb.from('chat_sessions').update({ status:'active', updated_at:new Date().toISOString() }).eq('id', sid);
+      await answerCb(cq.id, 'Diterima ✅');
+      await editMarkup(chatId, msgId, { inline_keyboard: [] });
+      await send(chatId, '✅ Kamu menerima chat. Tulis pesan, aku teruskan utuh ke pembeli. Ketik /stop untuk mengakhiri.');
+      await send(sess.buyer_chat_id, '✅ Penjual siap! Silakan tulis pesanmu, akan ku-sampaikan utuh tanpa diubah. Ketik /stop untuk mengakhiri 💝');
+      return;
+    }
+
     const { data: ordArr } = await sb.from('orders')
       .select('*, listings(title), stores(name, telegram_chat_id)').eq('order_code', code).limit(1);
     const ord = ordArr && ordArr[0];
@@ -179,7 +227,35 @@ async function handle(update) {
 
   // ===== COMMAND =====
   if (text.startsWith('/start')) {
+    // deep link: /start chat_<storeId> -> mulai alur hubungi penjual
+    const sp = text.split(' ');
+    const payload = sp[1] || '';
+    if (payload.startsWith('chat_')) {
+      const storeId = payload.slice(5);
+      const { data: stArr } = await sb.from('stores').select('id, name, telegram_chat_id, is_active').eq('id', storeId).limit(1);
+      const st = stArr && stArr[0];
+      if (!st) { await send(chatId, 'Toko tidak ditemukan 🙏'); return; }
+      if (String(st.telegram_chat_id) === String(cid)) { await send(chatId, 'Ini toko kamu sendiri 😄'); return; }
+      await send(chatId, `💬 Mau menghubungi penjual <b>${st.name}</b>?
+
+Tekan tombol di bawah, nanti aku mintakan izin ke penjual dulu. Kalau penjual setuju, kamu bisa chat langsung (pesan diteruskan apa adanya lewat aku, biar privasi dua pihak aman) 💝`, { inline_keyboard: [[{ text: '💬 Hubungkan ke Penjual', callback_data: `hub:${st.id}` }]] });
+      return;
+    }
     await send(chatId, `Halo${username ? ' @' + username : ''}! 💝 Selamat datang di <b>Chiescaciy 甜心</b> Bot.\n\n🆔 Telegram ID kamu: <code>${chatId}</code>\n\nBuat <b>seller</b>: salin ID di atas, paste ke form Buka Toko di website.\n\nPerintah:\n/id — cek ID\n/orders — pesanan masuk (seller)\n/help — bantuan\n\nMau tanya apa aja? Ketik aja, aku bantu jawab 😊`);
+    return;
+  }
+  if (text.startsWith('/stop')) {
+    const { data: cs } = await sb.from('chat_sessions')
+      .select('*').or(`buyer_chat_id.eq.${cid},seller_chat_id.eq.${cid}`).eq('status','active').limit(1);
+    const sess = cs && cs[0];
+    if (sess) {
+      await sb.from('chat_sessions').update({ status:'closed', updated_at:new Date().toISOString() }).eq('id', sess.id);
+      const other = String(sess.buyer_chat_id)===String(cid) ? sess.seller_chat_id : sess.buyer_chat_id;
+      await send(chatId, '💬 Chat ditutup. Makasih ya 💝');
+      if (other) await send(other, '💬 Lawan chat menutup percakapan. Sesi selesai 💝');
+    } else {
+      await send(chatId, 'Lagi nggak ada chat aktif.');
+    }
     return;
   }
   if (text.startsWith('/id')) { await send(chatId, `🆔 Telegram ID kamu: <code>${chatId}</code>`); return; }
@@ -233,7 +309,24 @@ async function handle(update) {
         return;
       }
     }
-    // (c) selain itu → CS AI
+    // (c) RELAY CHAT aktif → forward utuh ke lawan, jangan CS AI
+    const { data: csArr } = await sb.from('chat_sessions')
+      .select('*').or(`buyer_chat_id.eq.${cid},seller_chat_id.eq.${cid}`).eq('status','active')
+      .order('updated_at', { ascending: false }).limit(1);
+    const sess = csArr && csArr[0];
+    if (sess) {
+      const isBuyer = String(sess.buyer_chat_id) === String(cid);
+      const other = isBuyer ? sess.seller_chat_id : sess.buyer_chat_id;
+      const label = isBuyer ? '📩 Pesan dari Pembeli' : '📩 Pesan dari Penjual';
+      if (other) {
+        await send(other, `${label}:
+${text}`);
+        await sb.from('chat_sessions').update({ updated_at:new Date().toISOString() }).eq('id', sess.id);
+      }
+      return;
+    }
+
+    // (d) selain itu → CS AI
     await send(chatId, await csReply(text));
   }
 }
