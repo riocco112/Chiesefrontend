@@ -59,6 +59,15 @@ export default function Seller(){
       const slug=form.name.toLowerCase().replace(/[^a-z0-9]+/g,'-');
       const { error }=await supabase.from('stores').insert({ ...form, owner_id:user.id, slug, logo_url, agreed_tos:true, agreed_tos_at:new Date().toISOString() });
       if(error){ setBusy(false); return alert(error.message); }
+      // notif + verifikasi koneksi bot ke seller
+      try{
+        const msg = `🎉 <b>Toko ${form.name} berhasil dibuka!</b>\n\nKamu sekarang terhubung dengan Chiescaciy 甜心 Bot 💝\n\nMulai sekarang:\n• Pesanan masuk muncul di chat ini\n• Ketik /orders buat cek pesanan\n• Konfirmasi pembayaran & chat pembeli lewat bot ini\n\nSelamat jualan! 🛍️`;
+        const res = await fetch('/api/notify-order', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ chatId: form.telegram_chat_id, text: msg }) });
+        const j = await res.json().catch(()=>({}));
+        if(!j.ok){
+          alert('✅ Toko berhasil dibuat!\n\n⚠️ Tapi notif ke Telegram GAGAL masuk. Cek lagi Telegram Chat ID kamu (pakai tombol Ambil ID), nanti edit di pengaturan toko. Tanpa ID benar, notif pesanan nggak akan masuk.');
+        }
+      }catch(e){}
     }catch(e){ setBusy(false); return alert('Upload logo gagal: '+e.message); }
     setBusy(false); load();
   }
