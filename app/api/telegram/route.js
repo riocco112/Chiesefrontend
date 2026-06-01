@@ -93,7 +93,7 @@ async function handle(update) {
       if (isLepas) {
         await send(chatId, `✅ Pembayaran <code>${code}</code> dikonfirmasi.\n\n${detail}\n⏳ Menunggu pembeli kirim <b>password</b> lewat chat. Akan ku-teruskan ke sini begitu masuk.`);
         if (buyerTg && /^\d+$/.test(String(buyerTg)))
-          await send(buyerTg, `✅ <b>Pembayaran Dikonfirmasi!</b>\n\nOrder <code>${code}</code> dikonfirmasi penjual.\n\n🔒 Sekarang <b>kirim PASSWORD akun</b> kamu ke chat ini (ketik & kirim sebagai pesan biasa). Password langsung diteruskan ke penjual dan <b>tidak disimpan</b> di sistem.\n\nMakasih sudah order di <b>${storeName}</b> 💝`);
+          await send(buyerTg, `✅ <b>Pembayaran Dikonfirmasi!</b>\n\nOrder <code>${code}</code> dikonfirmasi penjual.\n\n🔒 Sekarang kirim <b>DATA LOGIN</b> akun kamu ke chat ini biar penjual bisa masuk. Kirim email/username login + password dalam 1 pesan.\n\nContoh:\n<code>email: nama@gmail.com\npassword: rahasia123</code>\n\nData langsung diteruskan ke penjual dan <b>tidak disimpan</b> di sistem.\n\nMakasih sudah order di <b>${storeName}</b> 💝`);
       } else if (otype === 'joki_gendong') {
         await send(chatId, `✅ Pembayaran <code>${code}</code> dikonfirmasi.\n\n${detail}\n👥 <b>Joki Gendong</b> — hubungi pembeli & ajak main bareng. Tidak perlu password. Kalau kelar, tekan <b>Tandai Selesai</b>.`);
         if (buyerTg && /^\d+$/.test(String(buyerTg)))
@@ -196,7 +196,7 @@ async function handle(update) {
       await sb.from('orders').update({ await_password: false, status: 'in_progress' }).eq('order_code', ap.order_code);
       const sc = ap.stores?.telegram_chat_id;
       if (sc) {
-        await send(sc, `🔑 <b>Password masuk — ${ap.order_code}</b>\n• Login: ${ap.login_via || '-'}\n• ID/Email: <code>${ap.account_id || '-'}</code>\n• Nickname: ${ap.nickname || '-'}\n• Password: <code>${text}</code>\n\nSilakan kerjakan joki. Kalau kelar, tekan <b>Tandai Selesai</b>.`, doneKb(ap.order_code));
+        await send(sc, `🔑 <b>Data login masuk — ${ap.order_code}</b>\n• Login via: ${ap.login_via || '-'}\n• User ID/Username: <code>${ap.account_id || '-'}</code>\n• Nickname: ${ap.nickname || '-'}\n\n📩 <b>Data dari pembeli:</b>\n<code>${text}</code>\n\nSilakan kerjakan joki. Kalau kelar, tekan <b>Tandai Selesai</b>.`, doneKb(ap.order_code));
       }
       await send(chatId, `✅ Data login order <code>${ap.order_code}</code> diteruskan ke penjual. Joki segera dikerjakan ya! 💝\n\n🔒 <i>Demi keamanan, hapus pesan password kamu setelah joki selesai.</i>`);
       return;
