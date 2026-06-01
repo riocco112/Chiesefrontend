@@ -6,13 +6,13 @@ export async function generateMetadata({ params }) {
   try {
     const sb = createServerReadClient();
     const { data } = await sb.from('stores')
-      .select('name, about, description, logo_url, rating_avg, sold_count')
+      .select('name, about, description, logo_url, rating_avg, sold_count, seed_sold')
       .eq('slug', slug).single();
     if (!data) {
       return { title: 'Toko tidak ditemukan' };
     }
     const rating = Number(data.rating_avg || 0).toFixed(1);
-    const sold = data.sold_count || 0;
+    const sold = (data.sold_count || 0) + (data.seed_sold || 0);
     const title = `${data.name} ⭐${rating}`;
     const desc = data.about
       ? data.about.slice(0,140)

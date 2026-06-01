@@ -59,7 +59,7 @@ export default function TokoClient(){
               </div>
               <div className="flex items-center gap-3 text-sm mt-1">
                 <span className="inline-flex items-center gap-1 text-amber-500 font-semibold"><Star className="w-4 h-4" fill="currentColor"/>{Number(store.rating_avg||0).toFixed(1)}</span>
-                <span className="text-slate-400">{store.sold_count||0} pesanan selesai</span>
+                <span className="text-slate-400">{(store.sold_count||0)+(store.seed_sold||0)} pesanan selesai</span>
               </div>
               {store.active_hours && <div className="inline-flex items-center gap-1.5 text-xs text-slate-500 bg-pink-50 px-3 py-1 rounded-full mt-2"><Clock className="w-3.5 h-3.5"/> {store.active_hours}</div>}
               {store.id && <div className="mt-2"><a href={`https://t.me/Jaaillbot?start=chat_${store.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-white bg-gradient-to-r from-pink-400 to-rose-400 px-4 py-2 rounded-full shadow shadow-pink-300/40 transition hover:opacity-90"><MessageCircle className="w-4 h-4"/> Chat Penjual</a></div>}

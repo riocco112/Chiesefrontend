@@ -50,7 +50,7 @@ export default function ProdukClient(){
               {item.stores?.id && <a href={`https://t.me/Jaaillbot?start=chat_${item.stores.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-rose-500 bg-pink-50 hover:bg-pink-100 px-2.5 py-1 rounded-full transition"><MessageCircle className="w-3.5 h-3.5"/> Chat Penjual</a>}
             </span>
             </div>
-            <div className="flex items-center gap-1 text-sm mb-4"><Star className="w-4 h-4 text-amber-400" fill="currentColor"/><span className="font-semibold text-amber-500">{Number(item.rating_avg).toFixed(1)}</span><span className="text-slate-400">· {item.sold_count} terjual</span></div>
+            <div className="flex items-center gap-1 text-sm mb-4"><Star className="w-4 h-4 text-amber-400" fill="currentColor"/><span className="font-semibold text-amber-500">{Number(item.rating_avg).toFixed(1)}</span><span className="text-slate-400">· {(item.sold_count||0)+(item.seed_sold||0)} terjual</span></div>
             <p className="text-slate-500 leading-relaxed mb-4">{item.description||'Tidak ada deskripsi.'}</p>
             {item.eta && <div className="inline-flex items-center gap-2 text-sm text-slate-600 bg-pink-50 px-3 py-1.5 rounded-full mb-6"><Clock className="w-4 h-4"/> Estimasi: {item.eta}</div>}
             <div className="font-display text-3xl font-semibold text-rose-500 mb-6">{rupiah(item.price)}</div>

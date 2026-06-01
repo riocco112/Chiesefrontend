@@ -36,13 +36,13 @@ export default function Home() {
         const supabase = createClient();
         const { data, error } = await supabase
           .from('listings')
-          .select('id, title, category, price, old_price, image_url, eta, rating_avg, sold_count, stores ( name, is_verified )')
+          .select('id, title, category, price, old_price, image_url, eta, rating_avg, sold_count, seed_sold, stores ( name, is_verified )')
           .eq('is_active', true).order('sold_count', { ascending: false });
         if (!error && data && data.length > 0) {
           setIsReal(true);
           setItems(data.map((d, i) => ({
             id: d.id, title: d.title, category: d.category, price: d.price, old_price: d.old_price,
-            image_url: d.image_url, eta: d.eta, rating_avg: d.rating_avg, sold_count: d.sold_count,
+            image_url: d.image_url, eta: d.eta, rating_avg: d.rating_avg, sold_count: (d.sold_count||0) + (d.seed_sold||0),
             seller: d.stores?.name ?? 'Toko', verified: d.stores?.is_verified ?? false,
             grad: GRADS[i % GRADS.length], badge: null,
           })));
