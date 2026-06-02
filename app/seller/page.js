@@ -122,7 +122,11 @@ async function simpanAbout(){
             <textarea className={inp} placeholder="Deskripsi toko" value={form.description} onChange={e=>setForm({...form,description:e.target.value})}/>
             <label className="text-xs font-semibold text-slate-500 mb-1 block">Logo / Foto Toko (opsional)</label>
             <input className="mb-3 text-sm text-slate-500 block" type="file" accept="image/*" onChange={e=>setLogo(e.target.files[0])}/>
-            <input className={inp} placeholder="Telegram Chat ID (dari @bot /id)" value={form.telegram_chat_id} onChange={e=>setForm({...form,telegram_chat_id:e.target.value})}/>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-semibold text-slate-500">Telegram Chat ID</label>
+              <a href="https://t.me/userinfobot" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-500 bg-pink-50 hover:bg-pink-100 px-3 py-2 rounded-lg transition">📋 Ambil ID Telegram</a>
+            </div>
+            <input className={inp} placeholder="Telegram Chat ID (angka, mis. 7710155531)" value={form.telegram_chat_id} onChange={e=>setForm({...form,telegram_chat_id:e.target.value})} inputMode="numeric"/>
             <input className={inp} placeholder="URL QRIS (opsional)" value={form.pay_qris_url} onChange={e=>setForm({...form,pay_qris_url:e.target.value})}/>
             <input className={inp} placeholder="Nomor GoPay (opsional)" value={form.pay_gopay} onChange={e=>setForm({...form,pay_gopay:e.target.value})}/>
             <input className={inp} placeholder="Link Saweria (opsional)" value={form.pay_saweria} onChange={e=>setForm({...form,pay_saweria:e.target.value})}/>
