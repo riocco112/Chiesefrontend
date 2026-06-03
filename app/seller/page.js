@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, LogOut, Store, Inbox, Trash2 } from 'lucide-react';
+import { Plus, LogOut, Store, Inbox, Trash2, Pencil } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { createClient } from '@/lib/supabase';
 import { uploadImage } from '@/lib/cloud';
@@ -31,6 +31,7 @@ export default function Seller(){
   const [agree,setAgree]=useState(false);
   const [lform,setLform]=useState({ title:'', category:'level', game:'heartopia', price:'', eta:'', description:'' });
   const [file,setFile]=useState(null); const [busy,setBusy]=useState(false);
+  const [editId,setEditId]=useState(null); const [editFile,setEditFile]=useState(null);
   const [aboutForm,setAboutForm]=useState({ about:'', active_hours:'' });
   const [aboutLogo,setAboutLogo]=useState(null);
   const supabase=createClient();
@@ -93,6 +94,28 @@ async function simpanAbout(){
       if(error){ setBusy(false); return alert(error.message); }
     }catch(e){ setBusy(false); return alert('Gagal: '+e.message); }
     setBusy(false); setAboutLogo(null); alert('About Me tersimpan!'); load();
+  }
+  function mulaiEdit(l){
+    setEditId(l.id);
+    setLform({ title:l.title||'', category:l.category||'level', game:l.game||'heartopia', price:String(l.price||''), eta:l.eta||'', description:l.description||'' });
+    setEditFile(null);
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function batalEdit(){
+    setEditId(null);
+    setLform({ title:'', category:'level', game:'heartopia', price:'', eta:'', description:'' });
+    setEditFile(null);
+  }
+  async function simpanEdit(){
+    setBusy(true);
+    try{
+      const old=listings.find(x=>x.id===editId);
+      let image_url=old?.image_url||null;
+      if(editFile) image_url=await uploadImage(editFile,'chiese/products');
+      const { error }=await supabase.from('listings').update({ title:lform.title, category:lform.category, game:lform.game, price:parseInt(lform.price)||0, eta:lform.eta, description:lform.description, image_url }).eq('id',editId);
+      if(error){ setBusy(false); return alert(error.message); }
+    }catch(e){ setBusy(false); return alert('Gagal simpan: '+e.message); }
+    setBusy(false); batalEdit(); load();
   }
   async function hapusListing(id){
     if(!confirm('Yakin hapus jasa ini?')) return;
@@ -204,14 +227,15 @@ async function simpanAbout(){
               <input className={inp} placeholder="Harga (angka, mis. 15000)" type="number" value={lform.price} onChange={e=>setLform({...lform,price:e.target.value})}/>
               <input className={inp} placeholder="Estimasi (mis. 1 jam)" value={lform.eta} onChange={e=>setLform({...lform,eta:e.target.value})}/>
               <textarea className={inp} placeholder="Deskripsi" value={lform.description} onChange={e=>setLform({...lform,description:e.target.value})}/>
-              <label className="text-xs font-semibold text-slate-500 mb-1 block">Foto Produk (opsional)</label>
-              <input className="mb-3 text-sm text-slate-500 block" type="file" accept="image/*" onChange={e=>setFile(e.target.files[0])}/>
-              <button onClick={tambahListing} disabled={busy||!lform.title} className="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-pink-400 to-rose-400 shadow-md shadow-pink-300/50 disabled:opacity-60">{busy?'Menyimpan…':'Tambah Jasa'}</button>
+              <label className="text-xs font-semibold text-slate-500 mb-1 block">Foto Produk {editId?'(kosongkan = foto lama dipakai)':'(opsional)'}</label>
+              <input className="mb-3 text-sm text-slate-500 block" type="file" accept="image/*" onChange={e=>editId?setEditFile(e.target.files[0]):setFile(e.target.files[0])}/>
+              <button onClick={editId?simpanEdit:tambahListing} disabled={busy||!lform.title} className="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-pink-400 to-rose-400 shadow-md shadow-pink-300/50 disabled:opacity-60">{busy?'Menyimpan…':(editId?'Simpan Perubahan':'Tambah Jasa')}</button>
+              {editId && <button onClick={batalEdit} disabled={busy} className="w-full mt-2 py-2.5 rounded-xl font-semibold text-rose-500 bg-pink-50 hover:bg-pink-100 transition disabled:opacity-60">Batal Edit</button>}
             </div>
 
             <h3 className="font-display text-lg font-semibold text-slate-800 mb-3">Jasa Kamu ({listings.length})</h3>
             <div className="grid sm:grid-cols-2 gap-3">
-              {listings.map(l=>(<div key={l.id} className="bg-white rounded-2xl border border-pink-100 p-4 flex items-center justify-between gap-3"><div><div className="flex items-center gap-2"><span className="text-[10px] font-bold bg-pink-100 text-rose-500 px-2 py-0.5 rounded-full">{GAMEMAP[l.game]||'Game'}</span></div><div className="font-semibold text-slate-700 text-sm mt-1">{l.title}</div><div className="text-rose-500 font-display font-semibold mt-1">{rupiah(l.price)}</div></div><button onClick={()=>hapusListing(l.id)} className="shrink-0 grid place-items-center w-9 h-9 rounded-full bg-rose-50 hover:bg-rose-100 transition" title="Hapus"><Trash2 className="w-4 h-4 text-rose-500"/></button></div>))}
+              {listings.map(l=>(<div key={l.id} className="bg-white rounded-2xl border border-pink-100 p-4 flex items-center justify-between gap-3"><div><div className="flex items-center gap-2"><span className="text-[10px] font-bold bg-pink-100 text-rose-500 px-2 py-0.5 rounded-full">{GAMEMAP[l.game]||'Game'}</span></div><div className="font-semibold text-slate-700 text-sm mt-1">{l.title}</div><div className="text-rose-500 font-display font-semibold mt-1">{rupiah(l.price)}</div></div><div className="shrink-0 flex gap-2"><button onClick={()=>mulaiEdit(l)} className="grid place-items-center w-9 h-9 rounded-full bg-pink-50 hover:bg-pink-100 transition" title="Edit"><Pencil className="w-4 h-4 text-rose-500"/></button><button onClick={()=>hapusListing(l.id)} className="grid place-items-center w-9 h-9 rounded-full bg-rose-50 hover:bg-rose-100 transition" title="Hapus"><Trash2 className="w-4 h-4 text-rose-500"/></button></div></div>))}
             </div>
           </>
         )}
