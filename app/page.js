@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, Star, ShoppingCart, Heart, Zap, ShieldCheck, Clock, Coins, Trophy, Sparkles, BadgeCheck, Flame } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import HeroCarousel from '@/components/HeroCarousel';
 import { createClient } from '@/lib/supabase';
 
 const CATEGORIES = [
@@ -68,20 +69,7 @@ export default function Home() {
           <div className="absolute bottom-[-30%] right-[8%] w-[360px] h-[360px] rounded-full bg-rose-200/40 blur-[110px]" />
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
-          <div className="reveal max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-pink-100 text-xs font-medium text-rose-400 mb-5 shadow-sm"><Sparkles className="w-3.5 h-3.5" /> Marketplace Joki Heartopia #1</div>
-            <h1 className="font-display text-4xl sm:text-6xl font-semibold leading-[1.05] tracking-tight mb-5 text-slate-800">Naik level tanpa<br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-pink-400 to-amber-300">grinding capek.</span></h1>
-            <p className="text-slate-500 text-base sm:text-lg leading-relaxed mb-8 max-w-lg">Pilih jasa joki terpercaya dari seller terverifikasi. Coin, level, quest, item langka — beres sambil kamu santai.</p>
-            <div className="flex flex-wrap gap-3">
-              <a href="#katalog" className="px-6 py-3 rounded-full font-semibold text-white bg-gradient-to-r from-pink-400 to-rose-400 shadow-lg shadow-pink-300/50 hover:scale-[1.02] transition">Jelajahi Jasa</a>
-              <Link href="/seller" className="px-6 py-3 rounded-full font-semibold text-rose-400 bg-white border border-pink-200 hover:bg-pink-50 transition">Jadi Seller</Link>
-            </div>
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mt-10 text-sm text-slate-500">
-              <span className="inline-flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-emerald-500" /> Garansi 100%</span>
-              <span className="inline-flex items-center gap-2"><Clock className="w-4 h-4 text-sky-500" /> Pengerjaan cepat</span>
-              <span className="inline-flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-pink-400" /> Seller terverifikasi</span>
-            </div>
-          </div>
+            <HeroCarousel />
         </div>
       </section>
       <div className="px-4 md:max-w-7xl md:mx-auto sm:px-6 -mt-4 mb-2">
