@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { ShieldCheck, Clock, BadgeCheck, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShieldCheck, Clock, BadgeCheck, Sparkles, ChevronLeft, ChevronRight, Volume2, VolumeX } from 'lucide-react';
 
 const VIDEO_URL = 'https://res.cloudinary.com/duu9uutzz/video/upload/f_auto,q_auto:good/lv_0_20260603195106_ygtmyc.mp4';
 const AUTO_MS = 50000;
