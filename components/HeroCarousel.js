@@ -3,11 +3,12 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ShieldCheck, Clock, BadgeCheck, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const VIDEO_URL = 'https://res.cloudinary.com/duu9uutzz/video/upload/lv_0_20260603165539_v9oasg.mp4';
+const VIDEO_URL = 'https://res.cloudinary.com/duu9uutzz/video/upload/f_auto,q_auto:good/lv_0_20260603195106_ygtmyc.mp4';
 const AUTO_MS = 50000;
 
 export default function HeroCarousel() {
   const [idx, setIdx] = useState(0);
+  const [muted, setMuted] = useState(true);
   const touchX = useRef(null);
   const videoRef = useRef(null);
 
@@ -51,7 +52,7 @@ export default function HeroCarousel() {
             </div>
           </div>
           <div className="w-full shrink-0 pl-1 flex items-center">
-            <video ref={videoRef} src={VIDEO_URL} className="w-full rounded-2xl shadow-lg shadow-pink-200/50 bg-black" muted loop playsInline preload="metadata" style={{ aspectRatio: '16 / 9' }} />
+            <div className="relative w-full"><video ref={videoRef} src={VIDEO_URL} className="w-full rounded-2xl shadow-lg shadow-pink-200/50 bg-black" muted={muted} loop playsInline preload="metadata" style={{ aspectRatio: '16 / 9' }} /><button onClick={(e)=>{e.stopPropagation(); setMuted(m=>!m);}} aria-label={muted?'Nyalakan suara':'Matikan suara'} className="absolute bottom-3 right-3 grid place-items-center w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 text-white transition backdrop-blur-sm">{muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}</button></div>
           </div>
         </div>
       </div>
