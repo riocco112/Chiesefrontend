@@ -33,7 +33,7 @@ export default function HeroCarousel() {
   };
 
   return (
-    <div className="relative max-w-2xl select-none" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+    <div className="group relative max-w-2xl select-none" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       <div className="overflow-hidden rounded-3xl">
         <div className="flex transition-transform duration-500 ease-out" style={{ transform: `translateX(-${idx * 100}%)` }}>
           <div className="w-full shrink-0 pr-1">
@@ -55,8 +55,8 @@ export default function HeroCarousel() {
           </div>
         </div>
       </div>
-      <button onClick={() => go(idx - 1)} aria-label="Sebelumnya" className="absolute left-2 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white/90 border border-pink-100 shadow hover:bg-pink-50 transition"><ChevronLeft className="w-5 h-5 text-rose-400" /></button>
-      <button onClick={() => go(idx + 1)} aria-label="Berikutnya" className="absolute right-2 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white/90 border border-pink-100 shadow hover:bg-pink-50 transition"><ChevronRight className="w-5 h-5 text-rose-400" /></button>
+      <button onClick={() => go(idx - 1)} aria-label="Sebelumnya" className="absolute left-2 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white/90 border border-pink-100 shadow hover:bg-pink-50 transition-opacity duration-300 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"><ChevronLeft className="w-5 h-5 text-rose-400" /></button>
+      <button onClick={() => go(idx + 1)} aria-label="Berikutnya" className="absolute right-2 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white/90 border border-pink-100 shadow hover:bg-pink-50 transition-opacity duration-300 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"><ChevronRight className="w-5 h-5 text-rose-400" /></button>
       <div className="flex justify-center gap-2 mt-5">
         {[0, 1].map((i) => (
           <button key={i} onClick={() => go(i)} aria-label={`Slide ${i + 1}`} className={`h-2 rounded-full transition-all ${idx === i ? 'w-6 bg-rose-400' : 'w-2 bg-pink-200'}`} />
