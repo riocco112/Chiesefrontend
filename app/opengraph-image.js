@@ -31,9 +31,9 @@ export default async function Image() {
         <div style={{ display: 'flex', fontSize: 38, fontWeight: 700, color: '#3a3a48', marginBottom: 14 }}>Chiescaciy 甜心</div>
         <div style={{ display: 'flex', fontSize: 30, color: '#6b6b7b', marginBottom: 30 }}>Heartopia · Mobile Legends · Roblox · Fisch · Fish It</div>
         <div style={{ display: 'flex', gap: 18, fontSize: 26, color: '#4a4a58' }}>
-          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.7)', padding: '10px 20px', borderRadius: 14 }}>✓ Aman</div>
-          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.7)', padding: '10px 20px', borderRadius: 14 }}>✓ Cepat</div>
-          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.7)', padding: '10px 20px', borderRadius: 14 }}>✓ Terpercaya</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.7)', padding: '10px 20px', borderRadius: 14 }}><div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, height: 30, borderRadius: 999, background: '#22c55e' }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg></div>Aman</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.7)', padding: '10px 20px', borderRadius: 14 }}><div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, height: 30, borderRadius: 999, background: '#22c55e' }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg></div>Cepat</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.7)', padding: '10px 20px', borderRadius: 14 }}><div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, height: 30, borderRadius: 999, background: '#22c55e' }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg></div>Terpercaya</div>
         </div>
       </div>
     ),
