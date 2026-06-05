@@ -3,6 +3,7 @@ import './globals.css';
 const SITE = 'https://chiese.vercel.app';
 
 export const metadata = {
+  verification: { google: 'qSUmnvcivQegZWaHfo1zqj3Eujhon_KN3xLXU75kzJU' },
   metadataBase: new URL(SITE),
   title: {
     default: 'Chiescaciy 甜心 · Marketplace Joki & Item Game',
@@ -20,13 +21,11 @@ export const metadata = {
     siteName: 'Chiescaciy 甜心',
     title: 'Chiescaciy 甜心 · Marketplace Joki & Item Game',
     description: 'Joki & item game terpercaya — Heartopia, ML, Roblox, Fisch, Fish It. Aman, cepat, transparan.',
-    images: [{ url: '/icon-512.png', width: 512, height: 512, alt: 'Chiescaciy 甜心' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Chiescaciy 甜心 · Marketplace Joki & Item Game',
     description: 'Joki & item game terpercaya — Heartopia, ML, Roblox, Fisch, Fish It.',
-    images: ['/icon-512.png'],
   },
   robots: { index: true, follow: true },
 };
