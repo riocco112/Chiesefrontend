@@ -31,5 +31,37 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  return (<html lang="id"><body>{children}</body></html>);
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': 'https://chiese.vercel.app/#org',
+        name: 'Chiescaciy 甜心',
+        url: 'https://chiese.vercel.app',
+        logo: 'https://chiese.vercel.app/icon-512.png',
+        description: 'Marketplace joki & item game terpercaya — Heartopia, Mobile Legends, Roblox, Fisch, Fish It. Aman, cepat, transparan.',
+        sameAs: [
+          'https://www.tiktok.com/@cleiclau_',
+          'https://www.instagram.com/keenayie',
+        ],
+      },
+      {
+        '@type': 'WebSite',
+        '@id': 'https://chiese.vercel.app/#website',
+        url: 'https://chiese.vercel.app',
+        name: 'Chiescaciy 甜心',
+        publisher: { '@id': 'https://chiese.vercel.app/#org' },
+        inLanguage: 'id-ID',
+      },
+    ],
+  };
+  return (
+    <html lang="id">
+      <body>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        {children}
+      </body>
+    </html>
+  );
 }
