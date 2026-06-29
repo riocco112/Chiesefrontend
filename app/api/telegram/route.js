@@ -188,9 +188,29 @@ Mau dilayani? Kalau terima, pesan pembeli akan diteruskan ke kamu lewat bot.`, {
   const text = (msg.text || '').trim();
   const username = msg.from?.username || '';
 
-  // ===== FOTO (bukti) =====
+  // ===== FOTO =====
   if (msg.photo) {
     const fileId = msg.photo[msg.photo.length - 1].file_id;
+    const caption = msg.caption || '';
+
+    // ARAH 0: CEK RELAY CHAT AKTIF DULU — foto diteruskan ke lawan chat
+    const { data: csPhotoArr } = await sb.from('chat_sessions')
+      .select('*').or(`buyer_chat_id.eq.${cid},seller_chat_id.eq.${cid}`).eq('status','active')
+      .order('updated_at', { ascending: false }).limit(1);
+    const sessPhoto = csPhotoArr && csPhotoArr[0];
+    if (sessPhoto) {
+      const isBuyer = String(sessPhoto.buyer_chat_id) === String(cid);
+      const other = isBuyer ? sessPhoto.seller_chat_id : sessPhoto.buyer_chat_id;
+      const label = isBuyer ? '📩 Foto dari Pembeli' : '📩 Foto dari Penjual';
+      if (other) {
+        const capText = caption ? `${label}:\n${caption}` : label;
+        await sendPhoto(other, fileId, capText);
+        await sb.from('chat_sessions').update({ updated_at:new Date().toISOString() }).eq('id', sessPhoto.id);
+        await send(chatId, '✅ Foto diteruskan ke lawan chat.');
+      }
+      return;
+    }
+
     // ARAH 1: SELLER kirim bukti HASIL
     const { data: stArr } = await sb.from('stores').select('id, name').eq('telegram_chat_id', cid).limit(1);
     const st = stArr && stArr[0];
